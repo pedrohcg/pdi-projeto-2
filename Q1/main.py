@@ -1,6 +1,7 @@
 import numpy as np
 import math
-from PIL import Image, ImageOps
+from PIL import Image
+import matplotlib.pyplot as plt
 import os.path
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -80,12 +81,19 @@ h, w = a.shape
 resultado_dct = dct1d(a)
 
 print("Resultado DC: ",resultado_dct[0])
+#Resultado DC:  31883.191406250007
 
 resultado_dct[0] = 0
 
+plt.plot(resultado_dct)
+x = np.arange(0, resultado_dct.size)
+plt.xlabel("Pixel")
+plt.ylabel("Valor")
+plt.plot(x, resultado_dct, color="blue")
+plt.show()
+
 resultado_dct = np.reshape(resultado_dct, (h, w))
 
-#(180, 216, 3)
 img_resultante_dct = Image.fromarray(resultado_dct.astype(np.uint8))
 
 img_resultante_dct.save("../resultados/q1/dct.png")
