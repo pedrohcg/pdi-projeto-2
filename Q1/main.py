@@ -6,7 +6,7 @@ import skimage.util
 import os.path
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-im = Image.open(os.path.join(script_dir, '../imagens/lena128.png')).convert('L')
+im = Image.open(os.path.join(script_dir, '../imagens/lena96.png')).convert('L')
 
 a = np.array(im)
 
@@ -95,7 +95,7 @@ def dct2d(img):
             sum = 0
             for k in range(k, m, 1):
                 for l in range(l, n, 1):
-                    sum = sum + (img[k, l]*(np.cos((((2*k)+1)*i*math.pi)/(2*m)))*(np.cos((((2*l)+1)*j*math.pi)/(2*n))))
+                    sum += (img[k, l]*(np.cos((((2*k)+1)*i*math.pi)/(2*m)))*(np.cos((((2*l)+1)*j*math.pi)/(2*n))))
                 l = 0
             k = 0
             dct[i, j] = (1/np.sqrt(2*n))*ci*cj*sum
@@ -128,7 +128,7 @@ def idct2d(img):
                     else:
                         cl = 1
                     
-                    sum = sum + (ck*cl*(img[k, l]*(np.cos((((2*i)+1)*k*math.pi)/(2*m)))*(np.cos((((2*j)+1)*l*math.pi)/(2*n)))))
+                    sum += (ck*cl*(img[k, l]*(np.cos((((2*i)+1)*k*math.pi)/(2*m)))*(np.cos((((2*j)+1)*l*math.pi)/(2*n)))))
                 l = 0
             k = 0
 
@@ -146,7 +146,7 @@ def aproximacao(img, n):
 
     maisImportante = img_ordenada[img_ordenada.size-n]
 
-    i = 1
+    i = 0
 
     for i in range(i, img_array.size, 1):
         if(img_array[i] < maisImportante):
@@ -253,9 +253,9 @@ def exec_dct2d(a):
 
     img_resultante_dct2d = Image.fromarray(resultado_dct.astype(np.uint16))
     img_resultante_dct2d.save("../resultados/q1/dct2d.png")
-
+    resultado_dct[0, 0] = 0
     resultado_dct_hist = histograma(resultado_dct)
-    resultado_dct_hist[0, 0] = 0
+    #resultado_dct_hist[0, 0] = 0
 
     resultado_dct_hist = resultado_dct_hist.flatten(order="C")
     
@@ -266,10 +266,9 @@ def exec_dct2d(a):
     plt.plot(x, resultado_dct_hist, color="blue")
     plt.show()
 
-    resultado_aprox = aproximacao(resultado_dct, 120)
+    resultado_aprox = aproximacao(resultado_dct, 320)
     resultado_aprox = np.reshape(resultado_aprox, (h, w))
     img_blocks_aprox = skimage.util.view_as_blocks(resultado_aprox, block_shape=(f, t))
-
     #print(img_blocks_aprox[0,0])
 
     img_blocks_idct = np.zeros(img_blocks.shape)
@@ -281,9 +280,11 @@ def exec_dct2d(a):
             img_blocks_idct_aprox[i, j] = idct2d(img_blocks_aprox[i, j])
         j = 0
     i = 0 
+
     img_blocks_idct = img_blocks_idct/offset
     img_blocks_idct_aprox = img_blocks_idct_aprox/offset
     #print("idct", img_blocks_idct[0, 0])
+
 
     resultado_idct = np.zeros(a.shape)
     resultado_idct_aprox = np.zeros(a.shape)
@@ -298,7 +299,7 @@ def exec_dct2d(a):
             k = 0
         j = 0
     i = 0
-    #print(resultado_idct[0])
+    #print(resultado_idct_aprox[0, 0])
 
     img_resultante_idct2d = Image.fromarray(resultado_idct.astype(np.uint8))
     img_resultante_idct2d_aprox = Image.fromarray(resultado_idct_aprox.astype(np.uint8))
@@ -308,8 +309,36 @@ def exec_dct2d(a):
 
     return
 
+def exec_aprox_1d(a):
+    h, w = a.shape
+
+    resultado_dct1d = dct1d(a)
+    resultado_aprox_1d = aproximacao(resultado_dct1d, 20)
+    resultado_idct_1d = idct1d(resultado_aprox_1d)
+    resultado_idct_1d = np.reshape(resultado_idct_1d, (h, w))
+    img_resultante_idct1d_aprox = Image.fromarray(resultado_idct_1d.astype(np.uint8))
+    img_resultante_idct1d_aprox.save("../resultados/q1/idct1d_aprox.png")
+
+    return
+
+def exec_aprox_2d(a):
+    h, w = a.shape
+    offset = h/8
+
+    resultado_dct2d = dct2d(a)
+    resultado_aprox_2d = aproximacao(resultado_dct2d, 20)
+    resultado_aprox = np.reshape(resultado_aprox_2d, (h, w))
+    resultado_idct2d = idct2d(resultado_aprox)
+    resultado_idct2d = resultado_idct2d/offset
+    img_resultante_idct2d_aprox = Image.fromarray(resultado_idct2d.astype(np.uint8))
+    img_resultante_idct2d_aprox.save("../resultados/q1/idct2d_aprox.png")
+
+    return
+
 #exec_dct1d(a)
-exec_dct2d(a)
+#exec_dct2d(a)
+exec_aprox_1d(a)
+#exec_aprox_2d(a)
 
 
 
