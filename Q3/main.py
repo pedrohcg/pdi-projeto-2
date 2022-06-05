@@ -60,33 +60,36 @@ def butterworth(frequency, fc):
     h = frequency.size
     i = 0
     n = 3
-    freqc = frequency[fc]
 
+    fa = 1/(h-1)
+    f1 = fa/(2*(h-1))
+    fchz = f1*fc
+ 
     for i in range(i, h, 1):
         if(i < fc):
-            frequency[i] = frequency[i]*(1/np.sqrt((1 + (np.power(frequency[i]/freqc, 2*n)))))
+            frequency[i] = frequency[i]*(1/np.sqrt((1 + (np.power(((f1*(i+1))/fchz), 2*n)))))
         else:
             frequency[i] = 0
     
     return
 
-def plot():
-    y = wavfile.read('../resultados/q3/MaisUmaSemana.wav')
-    print(y)
-    plt.plot(y[1])
-    x = np.arange(0, y[1].size)
+def plot(y):    
+    x = np.arange(0, y.size)
     plt.xlabel("Pixel")
     plt.ylabel("Valor")
-    plt.plot(x, y[1], color="blue")
+    plt.plot(x, y, color="blue")
     plt.show()
 
-plot()
+#plot(audio)
 
 resultado_dct = dct1d(audio)
-butterworth(resultado_dct, 480)
+butterworth(resultado_dct, 16000)
+plot(resultado_dct)
 resultado_idct = idct1d(resultado_dct)
-wavfile.write('../resultados/q3/MaisUmaSemana.wav', f[0], resultado_idct)
-a = wavfile.read('../resultados/q3/MaisUmaSemana.wav')
-print(a)
-"""wavfile.write('../resultados/q3/MaisUmaSemana2.wav', f[0], aa.astype(np.int16))
-print(aa[27890])"""
+#print(resultado_idct)
+wavfile.write('../resultados/q3/MaisUmaSemana16000.wav', f[0], resultado_idct.astype(np.int16))
+#print(resultado_idct.astype(np.int16))
+plot(resultado_idct.astype(np.int16))
+"""a = wavfile.read('../resultados/q3/MaisUmaSemana480-2.wav')
+print(a[1])
+plot(f)"""
