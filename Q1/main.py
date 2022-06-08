@@ -50,7 +50,6 @@ def dct1d(img):
 
 def idct1d(img):
     img = img.flatten(order='C')
-
     n = img.size
     i = k = sum = 0
 
@@ -176,18 +175,14 @@ def exec_dct1d(a):
     resultado_dct = dct1d(a)
 
     print("Resultado DC: ",resultado_dct[0])
-    #Resultado DC 256:  31883.191406250007
     #Resultado DC 128:  15912.953125000004
 
-    resultado_aprox = aproximacao(resultado_dct, 20)
-
     resultado_dct = np.reshape(resultado_dct, (h, w))
-
+    resultado_dct_2 = np.copy(resultado_dct)
+    resultado_dct_2[0, 0] = 0
     resultado_dct_hist = histograma(resultado_dct)
-
     resultado_dct_hist = resultado_dct_hist.flatten(order="C")
 
-    resultado_dct_hist[0] = 0
     
     plt.plot(resultado_dct_hist)
     x = np.arange(0, resultado_dct_hist.size)
@@ -212,7 +207,7 @@ def exec_dct1d(a):
 
     return
 
-def exec_dct2d(a):
+def exec_dct2d(a): 
     f = t = 128
     offset = f/8
     h, w = a.shape
@@ -245,8 +240,10 @@ def exec_dct2d(a):
 
     img_resultante_dct2d = Image.fromarray(resultado_dct.astype(np.uint16))
     img_resultante_dct2d.save("../resultados/q1/dct2d.png")
-    resultado_dct[0, 0] = 0
-    resultado_dct_hist = histograma(resultado_dct)
+
+    resultado_dct_2 = np.copy(resultado_dct)
+    resultado_dct_2[0, 0] = 0
+    resultado_dct_hist = histograma(resultado_dct_2)
     #resultado_dct_hist[0, 0] = 0
 
     resultado_dct_hist = resultado_dct_hist.flatten(order="C")
@@ -270,7 +267,6 @@ def exec_dct2d(a):
         j = 0
     i = 0 
 
-    img_blocks_idct = img_blocks_idct/offset
     #print("idct", img_blocks_idct[0, 0])
 
     resultado_idct = np.zeros(a.shape)
@@ -284,7 +280,7 @@ def exec_dct2d(a):
             k = 0
         j = 0
     i = 0
-
+    resultado_idct = resultado_idct/offset
     img_resultante_idct2d = Image.fromarray(resultado_idct.astype(np.uint8))
     img_resultante_idct2d.save("../resultados/q1/idct2d.png")
 

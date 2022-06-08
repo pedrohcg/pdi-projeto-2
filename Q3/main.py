@@ -56,7 +56,7 @@ def idct1d(img):
     
     return idct
 
-def butterworth(frequency, fc):
+def butterworth(frequency, fa_teste, fc):
     h = frequency.size
     i = 0
     n = 3
@@ -83,12 +83,10 @@ def plot(y):
 #plot(audio)
 
 resultado_dct = dct1d(audio)
-butterworth(resultado_dct, 16000)
-plot(resultado_dct)
+butterworth(resultado_dct, f[0], 8000)
 resultado_idct = idct1d(resultado_dct)
-#print(resultado_idct)
-wavfile.write('../resultados/q3/MaisUmaSemana16000.wav', f[0], resultado_idct.astype(np.int16))
-#print(resultado_idct.astype(np.int16))
+wavfile.write('../resultados/q3/MaisUmaSemana-teste.wav', f[0], resultado_idct.astype(np.int16))
+plot(resultado_dct)
 plot(resultado_idct.astype(np.int16))
 """a = wavfile.read('../resultados/q3/MaisUmaSemana480-2.wav')
 print(a[1])
