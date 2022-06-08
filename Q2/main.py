@@ -142,8 +142,6 @@ def butterworth(img, fc):
 def exec(a):
     h, w = a.shape
 
-    print(a)
-
     resultado_dct = dct1d(a)
 
     resultado_dct = np.reshape(resultado_dct, (h, w))
@@ -168,11 +166,8 @@ def exec_2(a):
     resultado_dct = np.zeros(a.shape)
     
     resultado_dct = dct2d(a)    
-
-    print(a[0,0])
-    print(resultado_dct)
     
-    butterworth(resultado_dct, 120)
+    butterworth(resultado_dct, 420)
     
     resultado_idct = np.zeros(a.shape)
 
@@ -186,5 +181,5 @@ def exec_2(a):
 
     return
 
-exec(a)
-#exec_2(a)
+#exec(a)
+exec_2(a)

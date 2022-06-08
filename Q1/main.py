@@ -50,7 +50,6 @@ def dct1d(img):
 
 def idct1d(img):
     img = img.flatten(order='C')
-
     n = img.size
     i = k = sum = 0
 
@@ -95,7 +94,7 @@ def dct2d(img):
             sum = 0
             for k in range(k, m, 1):
                 for l in range(l, n, 1):
-                    sum = sum + (img[k, l]*(np.cos((((2*k)+1)*i*math.pi)/(2*m)))*(np.cos((((2*l)+1)*j*math.pi)/(2*n))))
+                    sum += (img[k, l]*(np.cos((((2*k)+1)*i*math.pi)/(2*m)))*(np.cos((((2*l)+1)*j*math.pi)/(2*n))))
                 l = 0
             k = 0
             dct[i, j] = (1/np.sqrt(2*n))*ci*cj*sum
@@ -128,7 +127,7 @@ def idct2d(img):
                     else:
                         cl = 1
                     
-                    sum = sum + (ck*cl*(img[k, l]*(np.cos((((2*i)+1)*k*math.pi)/(2*m)))*(np.cos((((2*j)+1)*l*math.pi)/(2*n)))))
+                    sum += (ck*cl*(img[k, l]*(np.cos((((2*i)+1)*k*math.pi)/(2*m)))*(np.cos((((2*j)+1)*l*math.pi)/(2*n)))))
                 l = 0
             k = 0
 
@@ -146,7 +145,7 @@ def aproximacao(img, n):
 
     maisImportante = img_ordenada[img_ordenada.size-n]
 
-    i = 1
+    i = 0
 
     for i in range(i, img_array.size, 1):
         if(img_array[i] < maisImportante):
@@ -176,19 +175,14 @@ def exec_dct1d(a):
     resultado_dct = dct1d(a)
 
     print("Resultado DC: ",resultado_dct[0])
-    #Resultado DC 256:  31883.191406250007
     #Resultado DC 128:  15912.953125000004
 
-    resultado_aprox = aproximacao(resultado_dct, 20)
-    print(resultado_aprox)
-
     resultado_dct = np.reshape(resultado_dct, (h, w))
-
+    resultado_dct_2 = np.copy(resultado_dct)
+    resultado_dct_2[0, 0] = 0
     resultado_dct_hist = histograma(resultado_dct)
-
     resultado_dct_hist = resultado_dct_hist.flatten(order="C")
 
-    resultado_dct_hist[0] = 0
     
     plt.plot(resultado_dct_hist)
     x = np.arange(0, resultado_dct_hist.size)
@@ -198,29 +192,22 @@ def exec_dct1d(a):
     plt.show()
 
     img_resultante_dct = Image.fromarray(resultado_dct.astype(np.uint16))
-
     img_resultante_dct.save("../resultados/q1/dct.png")
+    resultado_dct_hist = np.reshape(resultado_dct_hist, (h, w))
+    img_resultante_hist = Image.fromarray(resultado_dct_hist.astype(np.uint16))
+    img_resultante_hist.save("../resultados/q1/hist1d.png")
 
     resultado_idct = idct1d(resultado_dct)
-    resultado_idct_aprox = idct1d(resultado_aprox)
-
     resultado_idct = np.reshape(resultado_idct, (h, w))
-    resultado_idct_aprox = np.reshape(resultado_idct_aprox, (h, w))
-
-    resultado_idct = histograma(resultado_idct)
-    resultado_idct_aprox = histograma(resultado_idct_aprox)
     
     #print(resultado_idct)
 
     img_resultante_idct = Image.fromarray(resultado_idct.astype(np.uint8))
-    img_resultante_aprox = Image.fromarray(resultado_idct_aprox.astype(np.uint8))
-
     img_resultante_idct.save("../resultados/q1/idct.png")
-    img_resultante_aprox.save("../resultados/q1/imagem_aprox.png")
 
     return
 
-def exec_dct2d(a):
+def exec_dct2d(a): 
     f = t = 128
     offset = f/8
     h, w = a.shape
@@ -254,8 +241,10 @@ def exec_dct2d(a):
     img_resultante_dct2d = Image.fromarray(resultado_dct.astype(np.uint16))
     img_resultante_dct2d.save("../resultados/q1/dct2d.png")
 
-    resultado_dct_hist = histograma(resultado_dct)
-    resultado_dct_hist[0, 0] = 0
+    resultado_dct_2 = np.copy(resultado_dct)
+    resultado_dct_2[0, 0] = 0
+    resultado_dct_hist = histograma(resultado_dct_2)
+    #resultado_dct_hist[0, 0] = 0
 
     resultado_dct_hist = resultado_dct_hist.flatten(order="C")
     
@@ -266,50 +255,67 @@ def exec_dct2d(a):
     plt.plot(x, resultado_dct_hist, color="blue")
     plt.show()
 
-    resultado_aprox = aproximacao(resultado_dct, 120)
-    resultado_aprox = np.reshape(resultado_aprox, (h, w))
-    img_blocks_aprox = skimage.util.view_as_blocks(resultado_aprox, block_shape=(f, t))
-
-    #print(img_blocks_aprox[0,0])
+    resultado_dct_hist = np.reshape(resultado_dct_hist, (h, w))
+    img_resultante_hist = Image.fromarray(resultado_dct_hist.astype(np.uint8))
+    img_resultante_hist.save("../resultados/q1/histograma.png")
 
     img_blocks_idct = np.zeros(img_blocks.shape)
-    img_blocks_idct_aprox = np.zeros(img_blocks.shape)
 
     for i in range (i, b, 1):
         for j in range (j, c, 1):
             img_blocks_idct[i, j] = idct2d(img_blocks_dct[i, j])
-            img_blocks_idct_aprox[i, j] = idct2d(img_blocks_aprox[i, j])
         j = 0
     i = 0 
-    img_blocks_idct = img_blocks_idct/offset
-    img_blocks_idct_aprox = img_blocks_idct_aprox/offset
+
     #print("idct", img_blocks_idct[0, 0])
 
     resultado_idct = np.zeros(a.shape)
-    resultado_idct_aprox = np.zeros(a.shape)
 
     for i in range(i, b, 1):
         for j in range(j, c, 1):
             for k in range(k, d, 1):
                 for l in range(l, e, 1):
                     resultado_idct[(i*f)+k, (j*t)+l] = img_blocks_idct[i, j][k, l]
-                    resultado_idct_aprox[(i*f)+k, (j*t)+l] = img_blocks_idct_aprox[i, j][k, l]
                 l = 0
             k = 0
         j = 0
     i = 0
-    #print(resultado_idct[0])
-
+    resultado_idct = resultado_idct/offset
     img_resultante_idct2d = Image.fromarray(resultado_idct.astype(np.uint8))
-    img_resultante_idct2d_aprox = Image.fromarray(resultado_idct_aprox.astype(np.uint8))
-
     img_resultante_idct2d.save("../resultados/q1/idct2d.png")
+
+    return
+
+def exec_aprox_1d(a):
+    h, w = a.shape
+
+    resultado_dct1d = dct1d(a)
+    resultado_aprox_1d = aproximacao(resultado_dct1d, 20)
+    resultado_idct_1d = idct1d(resultado_aprox_1d)
+    resultado_idct_1d = np.reshape(resultado_idct_1d, (h, w))
+    img_resultante_idct1d_aprox = Image.fromarray(resultado_idct_1d.astype(np.uint8))
+    img_resultante_idct1d_aprox.save("../resultados/q1/idct1d_aprox.png")
+
+    return
+
+def exec_aprox_2d(a):
+    h, w = a.shape
+    offset = h/8
+
+    resultado_dct2d = dct2d(a)
+    resultado_aprox_2d = aproximacao(resultado_dct2d, 20)
+    resultado_aprox = np.reshape(resultado_aprox_2d, (h, w))
+    resultado_idct2d = idct2d(resultado_aprox)
+    resultado_idct2d = resultado_idct2d/offset
+    img_resultante_idct2d_aprox = Image.fromarray(resultado_idct2d.astype(np.uint8))
     img_resultante_idct2d_aprox.save("../resultados/q1/idct2d_aprox.png")
 
     return
 
 #exec_dct1d(a)
 exec_dct2d(a)
+#exec_aprox_1d(a)
+#exec_aprox_2d(a)
 
 
 
